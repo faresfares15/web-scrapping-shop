@@ -1,7 +1,6 @@
 import axios from "axios"
 import * as cheerio from "cheerio"
-import { log } from "console"
-import { extractPrice } from "../utils"
+import { extractCurrency, extractPrice } from "../utils"
 export async function scrapeAmazonProduct(url: string) {
   if(!url) return
 
@@ -37,9 +36,37 @@ try {
     )
 
     const originalPrice = extractPrice(
-        $
+        $('#priceblock_ourprice'),
+        $('.a-price.a-text-price span.a-offscreen'),
+        $('#listPrice'),
+        $('#priceblock_dealprice'),
+        $('.a-size-base.a-color-price')
     )
-    console.log(title, currentPrice);
+        const outOfStock = $('#availability span').text().trim().toLowerCase() === 'currently unavailable.'
+        const images =  $('#imgBlkFront').attr('data-a-dynamic-image') || $('#landingImage').attr('data-a-dynamic-image') || '{}'
+        const imagesUrl = Object.keys(JSON.parse(images))
+        const category = $('#wayfinding-breadcrumbs_feature_div ul li:last-child a').text().trim();
+
+        const currency = extractCurrency($('.a-price-symbol'))
+        const discountRate = $('.savingsPercentage').text().replace(/[-%]/g, "")
+
+    // console.log({title, currentPrice, originalPrice, outOfStock, imageUrl: imagesUrl, currency, discountRate});
+    // construct data object with scraped data
+    const data = {
+        url, 
+        currency: currency || '$',
+        image: imagesUrl[0],
+        title,
+        currentPrice: Number(currentPrice),
+        originalPrice: Number(originalPrice),
+        priceHistory: [],
+        discountRate: Number(discountRate),
+        category,
+        reviewsCount: 100,
+        stars: 4.5,
+        isOutOfStock: outOfStock,
+    }
+    console.log(data);
 } catch (error:any) {
     throw new Error(`Failed to create/update product: ${error.message}`)
 }
