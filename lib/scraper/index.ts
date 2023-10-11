@@ -1,6 +1,6 @@
 import axios from "axios"
 import * as cheerio from "cheerio"
-import { extractCurrency, extractPrice } from "../utils"
+import { extractCurrency, extractDescription, extractPrice } from "../utils"
 export async function scrapeAmazonProduct(url: string) {
   if(!url) return
 
@@ -48,25 +48,31 @@ try {
         const category = $('#wayfinding-breadcrumbs_feature_div ul li:last-child a').text().trim();
 
         const currency = extractCurrency($('.a-price-symbol'))
-        const discountRate = $('.savingsPercentage').text().replace(/[-%]/g, "")
-
+        const discountRate = $('.savingsPercentage #text').text().replace(/[-%]/g, "")
+        const stars = $(".a-size-base .a-color-base").text().trim().split(" ")[0];
+        const reviewsCount = $(".a-size-base #acrCustomerReviewText").text().trim().split(" ")[0];
+        const description = extractDescription($);
     // console.log({title, currentPrice, originalPrice, outOfStock, imageUrl: imagesUrl, currency, discountRate});
     // construct data object with scraped data
     const data = {
-        url, 
-        currency: currency || '$',
-        image: imagesUrl[0],
-        title,
-        currentPrice: Number(currentPrice),
-        originalPrice: Number(originalPrice),
-        priceHistory: [],
-        discountRate: Number(discountRate),
-        category,
-        reviewsCount: 100,
-        stars: 4.5,
-        isOutOfStock: outOfStock,
-    }
-    console.log(data);
+			url,
+			currency: currency || "$",
+			image: imagesUrl[0],
+			title,
+			currentPrice: Number(currentPrice) || Number(originalPrice),
+			originalPrice: Number(originalPrice) || Number(currentPrice),
+			priceHistory: [],
+			discountRate: Number(discountRate),
+			category,
+			reviewsCount,
+			stars,
+			isOutOfStock: outOfStock,
+			description,
+			lowestPrice: Number(currentPrice) || Number(originalPrice),
+			highestPrice: Number(originalPrice) || Number(currentPrice),
+			averagePrice: Number(currentPrice) || Number(originalPrice),
+		};
+    return data;
 } catch (error:any) {
     throw new Error(`Failed to create/update product: ${error.message}`)
 }
