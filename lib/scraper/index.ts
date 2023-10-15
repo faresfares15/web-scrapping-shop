@@ -49,8 +49,8 @@ try {
 
         const currency = extractCurrency($('.a-price-symbol'))
         const discountRate = $('.savingsPercentage #text').text().replace(/[-%]/g, "")
-        const stars = $(".a-size-base .a-color-base").text().trim().split(" ")[0];
-        const reviewsCount = $(".a-size-base #acrCustomerReviewText").text().trim().split(" ")[0];
+        const stars = Number($(".a-size-medium .a-color-base .a-text-beside-button .a-text-bold").text().trim().split(" ")[0]);
+        const reviewsCount = Number($(".a-size-base #acrCustomerReviewText").text().trim().split(" ")[0].replace(/,/g, ""));
         const description = extractDescription($);
     // console.log({title, currentPrice, originalPrice, outOfStock, imageUrl: imagesUrl, currency, discountRate});
     // construct data object with scraped data
